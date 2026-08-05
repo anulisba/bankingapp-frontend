@@ -13,8 +13,31 @@ import {
     DarkModeRounded,
     ExpandMoreRounded,
 } from "@mui/icons-material";
+import Badge from "@mui/material/Badge";
+import NotificationPopup from "../common/NotificationPopup";
+import { useNotifications } from "../../context/NotificationContext";
+
+
+import { useEffect, useState } from "react";
+import NotificationDrawer from "./NotificationDrawer";
 
 export default function AppHeader() {
+
+
+    const { notifications } = useNotifications();
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [popupOpen, setPopupOpen] = useState(false);
+    const latestNotification = notifications[0];
+
+    const popupMessage = latestNotification
+        ? `${latestNotification.severity} Alert • ${latestNotification.hazard_summary} in ${latestNotification.city}`
+        : "";
+
+    useEffect(() => {
+        if (notifications.length > 0) {
+            setPopupOpen(true);
+        }
+    }, [notifications.length]);
     return (
         <Box
             sx={{
@@ -74,6 +97,7 @@ export default function AppHeader() {
 
                 <Tooltip title="Notifications">
                     <IconButton
+                        onClick={() => setDrawerOpen(true)}
                         sx={{
                             bgcolor: "#F8FAFC",
 
@@ -82,7 +106,12 @@ export default function AppHeader() {
                             },
                         }}
                     >
-                        <NotificationsNoneRounded />
+                        <Badge
+                            badgeContent={notifications.length}
+                            color="error"
+                        >
+                            <NotificationsNoneRounded />
+                        </Badge>
                     </IconButton>
                 </Tooltip>
 
@@ -147,6 +176,16 @@ export default function AppHeader() {
                     />
                 </Stack>
             </Stack>
+            <NotificationPopup
+                open={popupOpen}
+                message={popupMessage}
+                onClose={() => setPopupOpen(false)}
+            />
+            <NotificationDrawer
+                open={drawerOpen}
+                notifications={notifications}
+                onClose={() => setDrawerOpen(false)}
+            />
         </Box>
     );
 }
