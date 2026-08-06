@@ -2,30 +2,34 @@ import { useState } from "react";
 import { Box, IconButton, InputBase, Paper, Tooltip, Typography } from "@mui/material";
 
 import { AttachFileRounded, SendRounded, MicRounded, LockRounded } from "@mui/icons-material";
-import { useChatStore } from "../../store/chatStore";
-import { v4 as uuid } from "uuid";
+import { useChat } from "../../context/ChatProvider";
 export default function ChatInput() {
     const [message, setMessage] = useState("");
-    const addMessage = useChatStore((state) => state.addMessage);
-    const handleSend = () => {
+    const { sendMessage } = useChat();
+    const handleSend = async () => {
+
         if (!message.trim()) return;
 
-        addMessage({
-            id: uuid(),
-            role: "user",
-            content: message,
-        });
+        const text = message.trim();
 
         setMessage("");
 
-        // Backend call comes next
+        await sendMessage(text);
+
     };
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = async (
+        e: React.KeyboardEvent
+    ) => {
+
         if (e.key === "Enter" && !e.shiftKey) {
+
             e.preventDefault();
-            handleSend();
+
+            await handleSend();
+
         }
+
     };
 
     return (
